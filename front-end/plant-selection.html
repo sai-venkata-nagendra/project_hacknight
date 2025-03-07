@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Plant Selection</title>
+  <link href="https://cdn.jsdelivr.net/npm/lucide-static@0.16.0/font/lucide.css" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #1E1E1E;
+      color: white;
+    }
+    .container {
+      max-width: 100%;
+      margin: 0 auto;
+      padding: 0 16px;
+    }
+    .category-list {
+      display: flex;
+      overflow-x: auto;
+      gap: 16px;
+      padding-bottom: 16px;
+    }
+    .category {
+      background-color: #2D2D2D;
+      border-radius: 8px;
+      padding: 16px;
+      min-width: 280px;
+      height: 500px;
+      display: flex;
+      flex-direction: column;
+    }
+    .category h2 {
+      color: #4CAF50;
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 12px;
+    }
+    .plants-list {
+      flex: 1;
+      overflow-y: auto;
+      padding-right: 8px;
+    }
+    .plant-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px;
+      cursor: pointer;
+    }
+    .plant-item:hover {
+      background-color: #3D3D3D;
+      border-radius: 4px;
+    }
+    .plant-item input {
+      accent-color: #4CAF50;
+    }
+    .customize-button {
+      width: 100%;
+      background-color: #4CAF50;
+      color: white;
+      padding: 8px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-top: 12px;
+    }
+    .generate-button {
+      position: fixed;
+      bottom: 16px;
+      right: 16px;
+      background-color: #4CAF50;
+      color: white;
+      padding: 12px 16px;
+      border: none;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .dialog-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      z-index: 40;
+    }
+    .dialog {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 90%;
+      max-width: 400px;
+      background-color: #2D2D2D;
+      padding: 24px;
+      border-radius: 8px;
+      z-index: 50;
+    }
+    .dialog h2 {
+      color: #4CAF50;
+      font-size: 20px;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .dialog input {
+      width: 100%;
+      background-color: #1E1E1E;
+      border: 1px solid #666;
+      border-radius: 4px;
+      padding: 8px 12px;
+      color: white;
+      margin-bottom: 16px;
+    }
+    .dialog input:focus {
+      outline: none;
+      border-color: #4CAF50;
+    }
+    .dialog .info {
+      background-color: #1E1E1E;
+      padding: 12px;
+      border-radius: 4px;
+      margin-bottom: 16px;
+    }
+    .dialog .info div {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .dialog button {
+      width: 66.66%;
+      margin: 0 auto;
+      background-color: #4CAF50;
+      color: white;
+      padding: 8px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a 
+      href="index.html" 
+      class="fixed top-3 left-3 text-2xl font-bold transition-colors duration-300 hover:text-blue-500"
+      style="color: #39FF14; text-decoration: none; font-family: 'Orbitron', sans-serif;"
+      style="
+        color: #39FF14; 
+        text-decoration: none; 
+        font-family: 'Orbitron', sans-serif;
+        font-size: 16px;
+        padding: 10px 20px;
+        background-color: #4CAF50;
+        border-radius: 5px;
+        color: white;
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      "
+    >
+      <i data-lucide="arrow-left" style="width: 20px; height: 20px;"></i>
+      BACK
+    </a>
+
+    <div class="max-w-full mx-auto px-2 py-12">
+      <div class="category-list">
+        <!-- Categories will be dynamically inserted here -->
+      </div>
+
+ 
+
+      <button
+        onclick="handleGenerateDesign()"
+        class="generate-button"
+      >
+        <i data-lucide="leaf"></i>
+        Generate Design
+      </button>
+    </div>
+
+    <!-- Dialog -->
+    <div id="dialog-overlay" class="dialog-overlay" style="display: none;"></div>
+    <div id="dialog" class="dialog" style="display: none;">
+      <div class="relative mb-6 text-center">
+        <h2 id="dialog-title">Customize Category</h2>
+        <button
+          onclick="closeDialog()"
+          type="button"
+          title="Close dialog"
+          class="absolute right-0 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+        >
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <form onsubmit="handleCustomization(event)">
+        <input
+          type="text"
+          id="plant-name"
+          placeholder="Name of the Plant"
+          required
+          class="w-full bg-[#1E1E1E] border border-gray-600 rounded px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-[#4CAF50] text-sm"
+        />
+        <div class="info">
+          <div>
+            <span>Water Quantity:</span>
+            <span>Medium (400-500ml/week)</span>
+          </div>
+          <div>
+            <span>Climate Required:</span>
+            <span>Temperate (15-25°C)</span>
+          </div>
+        </div>
+        <button type="submit" class="w-2/3 mx-auto block bg-[#4CAF50] text-white py-2 rounded hover:opacity-90 transition-opacity text-sm">
+          Add Plant
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const categories = [
+      {
+        name: 'Vegetables',
+        plants: [
+          { id: 'tomato', name: 'Tomato' },
+          { id: 'carrot', name: 'Carrot' },
+          { id: 'pepper', name: 'Bell Pepper' },
+          { id: 'cucumber', name: 'Cucumber' },
+          { id: 'broccoli', name: 'Broccoli' },
+          { id: 'spinach', name: 'Spinach' },
+          { id: 'lettuce', name: 'Lettuce' },
+          { id: 'kale', name: 'Kale' },
+          { id: 'cabbage', name: 'Cabbage' },
+          { id: 'cauliflower', name: 'Cauliflower' },
+          { id: 'eggplant', name: 'Eggplant' },
+          { id: 'radish', name: 'Radish' },
+          { id: 'beetroot', name: 'Beetroot' },
+          { id: 'peas', name: 'Peas' },
+          { id: 'beans', name: 'Beans' },
+          { id: 'okra', name: 'Okra' },
+          { id: 'celery', name: 'Celery' },
+          { id: 'asparagus', name: 'Asparagus' },
+          { id: 'artichoke', name: 'Artichoke' },
+          { id: 'sweet-potato', name: 'Sweet Potato' },
+        ],
+      },
+      {
+        name: 'Fruits',
+        plants: [
+          { id: 'strawberry', name: 'Strawberry' },
+          { id: 'blueberry', name: 'Blueberry' },
+          { id: 'raspberry', name: 'Raspberry' },
+          { id: 'blackberry', name: 'Blackberry' },
+          { id: 'grape', name: 'Grape' },
+          { id: 'fig', name: 'Fig' },
+          { id: 'lemon', name: 'Lemon' },
+          { id: 'lime', name: 'Lime' },
+          { id: 'orange', name: 'Orange' },
+          { id: 'kumquat', name: 'Kumquat' },
+          { id: 'apple', name: 'Apple (Dwarf)' },
+          { id: 'pear', name: 'Pear (Dwarf)' },
+          { id: 'peach', name: 'Peach (Dwarf)' },
+          { id: 'plum', name: 'Plum (Dwarf)' },
+          { id: 'cherry', name: 'Cherry (Dwarf)' },
+          { id: 'pomegranate', name: 'Pomegranate' },
+          { id: 'kiwi', name: 'Kiwi' },
+          { id: 'passion-fruit', name: 'Passion Fruit' },
+          { id: 'mulberry', name: 'Mulberry' },
+          { id: 'gooseberry', name: 'Gooseberry' },
+        ],
+      },
+      {
+        name: 'Herbs',
+        plants: [
+          { id: 'basil', name: 'Basil' },
+          { id: 'mint', name: 'Mint' },
+          { id: 'rosemary', name: 'Rosemary' },
+          { id: 'thyme', name: 'Thyme' },
+          { id: 'oregano', name: 'Oregano' },
+          { id: 'sage', name: 'Sage' },
+          { id: 'parsley', name: 'Parsley' },
+          { id: 'cilantro', name: 'Cilantro' },
+          { id: 'dill', name: 'Dill' },
+          { id: 'chives', name: 'Chives' },
+          { id: 'lavender', name: 'Lavender' },
+          { id: 'lemon-balm', name: 'Lemon Balm' },
+          { id: 'chamomile', name: 'Chamomile' },
+          { id: 'fennel', name: 'Fennel' },
+          { id: 'marjoram', name: 'Marjoram' },
+          { id: 'tarragon', name: 'Tarragon' },
+          { id: 'stevia', name: 'Stevia' },
+          { id: 'borage', name: 'Borage' },
+          { id: 'catnip', name: 'Catnip' },
+          { id: 'lemon-grass', name: 'Lemon Grass' },
+        ],
+      },
+      {
+        name: 'Wall Hanging Plants',
+        plants: [
+          { id: 'pothos', name: 'Pothos' },
+          { id: 'philodendron', name: 'Philodendron' },
+          { id: 'english-ivy', name: 'English Ivy' },
+          { id: 'string-of-pearls', name: 'String of Pearls' },
+          { id: 'string-of-hearts', name: 'String of Hearts' },
+          { id: 'boston-fern', name: 'Boston Fern' },
+          { id: 'burros-tail', name: "Burro's Tail" },
+          { id: 'air-plant', name: 'Air Plant' },
+          { id: 'spider-plant', name: 'Spider Plant' },
+          { id: 'wandering-jew', name: 'Wandering Jew' },
+          { id: 'swedish-ivy', name: 'Swedish Ivy' },
+          { id: 'lipstick-plant', name: 'Lipstick Plant' },
+          { id: 'string-of-bananas', name: 'String of Bananas' },
+          { id: 'hoya', name: 'Hoya' },
+          { id: 'peperomia', name: 'Peperomia' },
+          { id: 'monstera-adansonii', name: 'Monstera Adansonii' },
+          { id: 'fishbone-cactus', name: 'Fishbone Cactus' },
+          { id: 'string-of-dolphins', name: 'String of Dolphins' },
+          { id: 'ruby-necklace', name: 'Ruby Necklace' },
+          { id: 'trailing-jade', name: 'Trailing Jade' },
+        ],
+      },
+      {
+        name: 'Decorative Plants',
+        plants: [
+          { id: 'monstera', name: 'Monstera Deliciosa' },
+          { id: 'snake-plant', name: 'Snake Plant' },
+          { id: 'peace-lily', name: 'Peace Lily' },
+          { id: 'zz-plant', name: 'ZZ Plant' },
+          { id: 'fiddle-leaf', name: 'Fiddle Leaf Fig' },
+          { id: 'rubber-plant', name: 'Rubber Plant' },
+          { id: 'bird-paradise', name: 'Bird of Paradise' },
+          { id: 'chinese-evergreen', name: 'Chinese Evergreen' },
+          { id: 'dracaena', name: 'Dracaena' },
+          { id: 'calathea', name: 'Calathea' },
+          { id: 'anthurium', name: 'Anthurium' },
+          { id: 'orchid', name: 'Orchid' },
+          { id: 'alocasia', name: 'Alocasia' },
+          { id: 'palm', name: 'Palm' },
+          { id: 'yucca', name: 'Yucca' },
+          { id: 'bamboo', name: 'Lucky Bamboo' },
+          { id: 'croton', name: 'Croton' },
+          { id: 'dieffenbachia', name: 'Dieffenbachia' },
+          { id: 'schefflera', name: 'Schefflera' },
+          { id: 'jade-plant', name: 'Jade Plant' },
+        ],
+      },
+    ];
+
+    const selectedPlants = new Set();
+      function togglePlant(plantId) {
+        if (selectedPlants.has(plantId)) {
+          selectedPlants.delete(plantId);
+        } else {
+          selectedPlants.add(plantId);
+        }
+        // Store selected plants in localStorage
+        localStorage.setItem('selectedPlants', JSON.stringify(Array.from(selectedPlants)));
+        renderCategories();
+    }
+
+    function openDialog(category) {
+      document.getElementById('dialog-title').textContent = `Customize ${category}`;
+      document.getElementById('dialog-overlay').style.display = 'block';
+      document.getElementById('dialog').style.display = 'block';
+    }
+
+    function closeDialog() {
+      document.getElementById('dialog-overlay').style.display = 'none';
+      document.getElementById('dialog').style.display = 'none';
+    }
+
+    function handleCustomization(event) {
+      event.preventDefault();
+      closeDialog();
+    }
+       
+     function handleGenerateDesign() {
+          localStorage.setItem('selectedPlants', JSON.stringify(Array.from(selectedPlants)));
+          window.location.href = 'dashboard.html';
+      }
+
+    function renderCategories() {
+      const categoryList = document.querySelector('.category-list');
+      categoryList.innerHTML = categories
+        .map(
+          (category) => `
+            <div class="category">
+              <h2>${category.name}</h2>
+              <div class="plants-list">
+                ${category.plants
+                  .map(
+                    (plant) => `
+                      <div class="plant-item">
+                        <input
+                          type="checkbox"
+                          id="${plant.id}"
+                          ${selectedPlants.has(plant.id) ? 'checked' : ''}
+                          onchange="togglePlant('${plant.id}')"
+                        />
+                        <label for="${plant.id}">${plant.name}</label>
+                      </div>
+                    `
+                  )
+                  .join('')}
+              </div>
+              <button onclick="openDialog('${category.name}')" class="customize-button">
+                Customize ${category.name}
+              </button>
+            </div>
+          `
+        )
+        .join('');
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      renderCategories();
+      lucide.createIcons();
+    });
+  </script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+</body>
+</html>

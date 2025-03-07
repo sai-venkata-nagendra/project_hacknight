@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rooftop Plant Management</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background: url('BG.jpg') no-repeat center center fixed;
+            background-size: cover;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background: rgba(30, 30, 30, 0.8);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .logo-container {
+            display: flex;
+            align-items: center;
+        }
+        .logo {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        header h1 {
+            font-size: 24px;
+            font-weight: 600;
+            background: linear-gradient(135deg, #76ff03, #90caf9);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        nav a {
+            color: #90caf9;
+            text-decoration: none;
+            margin-left: 15px;
+            font-weight: 600;
+            font-size: 16px;
+            transition: color 0.3s;
+        }
+        nav a:hover {
+            color: #64dd17;
+        }
+        .hero {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 100px 50px;
+            text-align: left;
+            margin: 0 auto;
+            max-width: 1200px;
+        }
+        .hero-text h2 {
+            font-size: 60px;
+            font-weight: 600;
+            line-height: 1.2;
+            background: linear-gradient(135deg, #76ff03, #90caf9);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: text-glow 2s infinite alternate;
+            margin: 0;
+        }
+        @keyframes text-glow {
+            0% { text-shadow: 0 0 10px #76ff03; }
+            100% { text-shadow: 0 0 20px #90caf9; }
+        }
+        .animated-rooftop {
+            perspective: 1000px;
+            position: relative;
+        }
+        .animated-rooftop img {
+            width: 400px;
+            border-radius: 15px;
+            transform-style: preserve-3d;
+            transition: transform 0.1s;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+            filter: drop-shadow(0 0 10px rgba(118, 255, 3, 0.5)); /* Glow effect */
+        }
+        .get-started {
+            text-align: center;
+            margin: 50px 0;
+        }
+        .btn {
+            background: linear-gradient(135deg, #76ff03, #64dd17);
+            padding: 15px 30px;
+            color: #121212;
+            font-size: 18px;
+            font-weight: 600;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.3);
+        }
+        .features {
+            text-align: center;
+            padding: 50px 20px;
+        }
+        .features h2 {
+            font-size: 40px;
+            font-weight: 600;
+            background: linear-gradient(135deg, #76ff03, #90caf9);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 30px;
+        }
+        .feature-grid {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .feature {
+            flex: 1 1 300px;
+            max-width: 300px;
+        }
+        .feature img {
+            width: 100%;
+            border-radius: 15px;
+            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+        .feature img:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.3);
+        }
+        .feature p {
+            font-size: 18px;
+            font-weight: 600;
+            color: #90caf9;
+            margin-top: 10px;
+        }
+        .about {
+            text-align: center;
+            padding: 50px 20px;
+        }
+        .about h2 {
+            font-size: 40px;
+            font-weight: 600;
+            background: linear-gradient(135deg, #76ff03, #90caf9);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
+        }
+        .about p {
+            font-size: 18px;
+            color: #90caf9;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo-container">
+            <img src="logo.png" alt="Logo" class="logo">
+            <h1>Rooftop Plant Management</h1>
+        </div>
+        <nav>
+            <a href="login.html">Login</a>
+            <a href="signup.html">Signup</a>
+        </nav>
+    </header>
+    
+    <section class="hero">
+        <div class="hero-text">
+            <h2>Generate</h2>
+            <h2>Your</h2>
+            <h2>Rooftop</h2>
+            <h2>Design</h2>
+        </div>
+        <div class="animated-rooftop" id="rooftop-container">
+            <img src="animated.jpeg" alt="Animated Rooftop" id="rooftop-image">
+        </div>
+    </section>
+    
+    <div class="get-started">
+        <a href="Home.html" class="btn">Get Started</a>
+    </div>
+    
+    <section class="features">
+        <h2>Why Choose Us?</h2>
+        <div class="feature-grid">
+            <div class="feature">
+                <img src="feature1.jpeg" alt="Feature 1">
+                <p>Eco-friendly rooftop designs</p>
+            </div>
+            <div class="feature">
+                <img src="feature2.jpg" alt="Feature 2">
+                <p>Smart plant recommendations</p>
+            </div>
+            <div class="feature">
+                <img src="feature3.jpg" alt="Feature 3">
+                <p>Customized layouts for every home</p>
+            </div>
+        </div>
+    </section>
+    
+    <section class="about">
+        <h2>About Us</h2>
+        <p>We help you design and manage rooftop gardens, making urban spaces greener and healthier.</p>
+    </section>
+
+    <script>
+        // JavaScript for interactive image movement
+        const rooftopContainer = document.getElementById('rooftop-container');
+        const rooftopImage = document.getElementById('rooftop-image');
+
+        rooftopContainer.addEventListener('mousemove', (e) => {
+            const { offsetX, offsetY } = e;
+            const { offsetWidth, offsetHeight } = rooftopContainer;
+
+            // Calculate rotation based on mouse position
+            const rotateX = (offsetY - offsetHeight / 2) / 20;
+            const rotateY = (offsetX - offsetWidth / 2) / 20;
+
+            // Apply rotation to the image
+            rooftopImage.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+        });
+
+        rooftopContainer.addEventListener('mouseleave', () => {
+            // Reset rotation when mouse leaves
+            rooftopImage.style.transform = 'rotateX(0) rotateY(0)';
+        });
+    </script>
+</body>
+</html>

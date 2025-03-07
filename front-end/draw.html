@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Draw Your Roof</title>
+    <style>
+        :root {
+            --primary: #4CAF50;
+            --background: #1E1E1E;
+            --text: #FFFFFF;
+        }
+
+        body {
+            margin: 0;
+            background-color: var(--background);
+            color: var(--text);
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .drawing-area {
+            background: #fff;
+            border-radius: 8px;
+            margin: 20px 0;
+            box-shadow: 0 0 10px rgba(0,0,0,0.3);
+        }
+
+        .tools {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .tool-btn {
+            padding: 8px 16px;
+            background: #2D2D2D;
+            border: 2px solid var(--primary);
+            color: var(--text);
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .tool-btn:hover {
+            background: var(--primary);
+        }
+
+        .tool-btn.active {
+            background: var(--primary);
+        }
+
+        .color-picker {
+            height: 40px;
+            padding: 0 8px;
+            background: #2D2D2D;
+            border: 2px solid var(--primary);
+            border-radius: 4px;
+        }
+
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            padding: 8px 16px;
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .back-btn:hover {
+            background: var(--primary);
+            color: var(--text);
+        }
+    </style>
+</head>
+<body>
+    <!-- Update the back button link -->
+    <button class="back-btn" onclick="window.location.href='index.html'">
+        ← Back
+    </button>
+
+    <div class="container">
+        <div class="tools">
+            <button class="tool-btn active" onclick="setTool('pencil')">✏️ Pencil</button>
+            <button class="tool-btn" onclick="setTool('line')">📏 Line</button>
+            <button class="tool-btn" onclick="setTool('rectangle')">⬜ Rectangle</button>
+            <button class="tool-btn" onclick="setTool('circle')">⭕ Circle</button>
+            <button class="tool-btn" onclick="setTool('triangle')">📐 Triangle</button>
+            <input type="color" class="color-picker" onchange="setColor(this.value)" value="#000000">
+            <button class="tool-btn" onclick="clearCanvas()">🗑️ Clear</button>
+            <button class="tool-btn" onclick="downloadDrawing()">💾 Save</button>
+        </div>
+
+        <canvas id="drawingCanvas" class="drawing-area"></canvas>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('drawingCanvas');
+        const ctx = canvas.getContext('2d');
+        let currentTool = 'pencil';
+        let isDrawing = false;
+        let startX, startY;
+        let snapshot; // To store the canvas state
+
+        // Set canvas size
+        function resizeCanvas() {
+            canvas.width = window.innerWidth - 40;
+            canvas.height = window.innerHeight - 150;
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        function setTool(tool) {
+            currentTool = tool;
+            document.querySelectorAll('.tool-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+        }
+
+        function setColor(color) {
+            ctx.strokeStyle = color;
+            ctx.fillStyle = color;
+        }
+
+        function clearCanvas() {
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+
+        function downloadDrawing() {
+            const imageData = canvas.toDataURL();
+            
+            // Save to MongoDB
+            fetch('http://localhost:3000/api/drawings', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ imageData })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Download the file
+                    const link = document.createElement('a');
+                    link.download = 'roof-design.png';
+                    link.href = imageData;
+                    link.click();
+                    alert('Drawing saved successfully!');
+                } else {
+                    alert('Error saving drawing');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error saving drawing');
+            });
+        }
+            const link = document.createElement('a');
+            link.download = 'roof-design.png';
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseout', stopDrawing);
+
+        function startDrawing(e) {
+            isDrawing = true;
+            [startX, startY] = [e.offsetX, e.offsetY];
+            ctx.beginPath();
+            ctx.moveTo(startX, startY);
+
+            // Save the canvas state
+            snapshot = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+
+            // Restore the canvas state
+            ctx.putImageData(snapshot, 0, 0);
+
+            switch (currentTool) {
+                case 'pencil':
+                    ctx.lineTo(e.offsetX, e.offsetY);
+                    ctx.stroke();
+                    break;
+                case 'line':
+                    ctx.beginPath();
+                    ctx.moveTo(startX, startY);
+                    ctx.lineTo(e.offsetX, e.offsetY);
+                    ctx.stroke();
+                    break;
+                case 'rectangle':
+                    ctx.beginPath();
+                    ctx.rect(startX, startY, e.offsetX - startX, e.offsetY - startY);
+                    ctx.stroke();
+                    break;
+                case 'circle':
+                    const radius = Math.sqrt(Math.pow(e.offsetX - startX, 2) + Math.pow(e.offsetY - startY, 2));
+                    ctx.beginPath();
+                    ctx.arc(startX, startY, radius, 0, 2 * Math.PI);
+                    ctx.stroke();
+                    break;
+                case 'triangle':
+                    ctx.beginPath();
+                    ctx.moveTo(startX, startY);
+                    ctx.lineTo(e.offsetX, e.offsetY);
+                    ctx.lineTo(startX - (e.offsetX - startX), e.offsetY);
+                    ctx.closePath();
+                    ctx.stroke();
+                    break;
+            }
+        }
+
+        function stopDrawing() {
+            isDrawing = false;
+        }
+
+        // Initialize
+        ctx.strokeStyle = '#000000';
+        ctx.lineWidth = 2;
+        ctx.lineCap = 'round';
+    </script>
+</body>
+</html>
